@@ -8,6 +8,7 @@ class CreateUserAPIView(generics.CreateAPIView):
     serializer_class = CreateUserSerializer
 
     def create(self, request, *args, **kwargs):
+        """Хеширование пароля и отправка письма"""
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.save()

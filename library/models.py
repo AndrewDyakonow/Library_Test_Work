@@ -4,6 +4,7 @@ from django.utils.timezone import now
 
 
 class Book(models.Model):
+    """Модель книги"""
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=63, verbose_name='Название')
     author = models.CharField(max_length=63, verbose_name='Автор')
