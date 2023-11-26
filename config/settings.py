@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import pymysql
+
+from env_setting import db_setting, smtp_setting
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +40,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
+    'redis',
+
+    'library',
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -73,10 +82,17 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+pymysql.version_info = (1, 4, 6, 'final', 0)
+pymysql.install_as_MySQLdb()
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': db_setting.NAME,
+        'USER': db_setting.USER,
+        'PASSWORD': db_setting.PASSWORD,
+        'HOST': db_setting.HOST,
+        'PORT': db_setting.PORT,
     }
 }
 
@@ -121,3 +137,18 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTH_USER_MODEL = 'users.Users'
+
+EMAIL_HOST = smtp_setting.EMAIL_HOST
+EMAIL_HOST_USER = smtp_setting.EMAIL_HOST_USER
+EMAIL_HOST_PASSWORD = smtp_setting.EMAIL_HOST_PASSWORD
+EMAIL_PORT = smtp_setting.EMAIL_PORT
+EMAIL_USE_TLS = smtp_setting.EMAIL_USE_TLS
+EMAIL_USE_SSL = smtp_setting.EMAIL_USE_SSL
+
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+CELERY_TIMEZONE = 'Europe/Moscow'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 2 * 10
