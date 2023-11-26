@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  web_app:
+    build:
+      context: .
+    container_name: web_app
+    command:
+      sh -c "python3 manage.py migrate && python3 manage.py csu && python3 manage.py runserver 0.0.0.0:8000"
+    networks:
+      - library_net
+    ports:
+      - '8001:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:latest
+    container_name: library_database
+    networks:
+      - library_net
+    environment:
+      - MYSQL_ROOT_PASSWORD=123qwe456rty
+      - MYSQL_DATABASE=db_library
+      - MYSQL_USER=blendis
+      - MYSQL_PASSWORD=itsme
+    ports:
+      - '5150:3306'
+    healthcheck:
+      test: ["CMD", 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-p$$MYSQL_ROOT_PASSWORD' ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7.0.2-alpine
+    hostname: redis
+    container_name: redis_library
+    ports:
+      - '6381:6379'
+    networks:
+      - library_net
+
+  worker:
+    build:
+      context: .
+    hostname: worker
+    container_name: celery_worker
+    networks:
+      - library_net
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - ./:/test_work_library/
+    links:
+      - redis
+    depends_on:
+      - redis
+
+networks:
+  library_net:
+    driver: bridge
