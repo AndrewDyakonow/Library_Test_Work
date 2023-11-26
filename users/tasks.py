@@ -6,6 +6,7 @@ from env_setting import smtp_setting
 
 @shared_task
 def send_mail_new_user(user_email):
+    """Асинхронная задача отправки письма"""
     send_mail(
         "Здравствуйте!",
         f"""Вы зарегистрировались!""",
